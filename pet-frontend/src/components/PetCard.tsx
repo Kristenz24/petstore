@@ -1,4 +1,3 @@
-// src/components/PetCard.tsx
 import { useState } from 'react';
 import { Pet } from '../api/petService';
 
@@ -12,6 +11,7 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
   const [expanded, setExpanded] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
   const [editedPet, setEditedPet] = useState<Pet>({ ...pet });
+  const [imageError, setImageError] = useState(false); // Track if the image fails to load
 
   const handleExpandClick = () => {
     setExpanded(!expanded);
@@ -39,15 +39,18 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
     }));
   };
 
+  // Function to handle the image error (invalid or missing image)
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <div className="pet-card">
       <div className="pet-media">
         <img 
-          src={pet.image} 
+          src={imageError || !pet.image ? '/images/placeholder.jpg' : pet.image} // Use public folder path for image
           alt={`Image of ${pet.name}`} 
-          onError={(e) => {
-            (e.target as HTMLImageElement).src = 'https://via.placeholder.com/300x200?text=No+Image';
-          }}
+          onError={handleImageError} // Handle invalid image
         />
       </div>
 
@@ -106,9 +109,10 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
         ) : (
           <>
             <h2>{pet.name}</h2>
-            <h3>{pet.species} ({pet.breed})</h3>
-            <h4>Gender: {pet.gender}</h4>
-            <h4>Price: ${pet.price.toFixed(2)}</h4>
+            <h3>Species: {pet.species}</h3>
+            <h3>Breed: {pet.breed}</h3>
+            <h3>Gender: {pet.gender}</h3>
+            <h3>Price: ${pet.price.toFixed(2)}</h3>
             {expanded && <p className="pet-description">{pet.description}</p>}
           </>
         )}

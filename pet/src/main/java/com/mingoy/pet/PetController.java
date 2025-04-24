@@ -17,13 +17,11 @@ public class PetController {
     private PetRepository petRepository;
 
     @GetMapping(path = "/pets")
-    @CrossOrigin(origins = "*")
     public @ResponseBody Iterable<Pet> getAllPets() {
         return petRepository.findAll();
     }
 
     @PostMapping(path = "/pets")
-    @CrossOrigin(origins = "*")
     public ResponseEntity<Pet> addPet(
             @RequestBody(required = false) Pet pet,
             @RequestParam(required = false) String name,
@@ -57,7 +55,6 @@ public class PetController {
     }
 
     @PutMapping(path = "/pets/{id}")
-    @CrossOrigin(origins = "*")
     public ResponseEntity<String> updatePet(@PathVariable Integer id, @RequestBody Pet petDetails) {
         Pet existingPet = petRepository.findById(id).orElse(null);
         if (existingPet == null) {
@@ -77,7 +74,6 @@ public class PetController {
     }
 
     @DeleteMapping(path = "/pets/{id}")
-    @CrossOrigin(origins = "*")
     public ResponseEntity<String> deletePet(@PathVariable Integer id) {
         Pet existingPet = petRepository.findById(id).orElse(null);
         if (existingPet == null) {
@@ -89,7 +85,6 @@ public class PetController {
     }
 
     @GetMapping(path = "/pets/{id}")
-    @CrossOrigin(origins = "*")
     public ResponseEntity<Pet> getPetById(@PathVariable Integer id) {
         Pet pet = petRepository.findById(id).orElse(null);
         if (pet == null) {
@@ -99,7 +94,6 @@ public class PetController {
     }
 
     @GetMapping(path = "/pets/search/{key}")
-    @CrossOrigin(origins = "*")
     public ResponseEntity<List<Pet>> searchPets(@PathVariable String key) {
         List<Pet> result = ((List<Pet>) petRepository.findAll()).stream()
                 .filter(pet -> pet.getName().toLowerCase().contains(key.toLowerCase()) ||
@@ -117,7 +111,6 @@ public class PetController {
     }
 
     @GetMapping(path = "/pets/search/price/{price}")
-    @CrossOrigin(origins = "*")
     public ResponseEntity<List<Pet>> getPetsByPrice(@PathVariable Double price) {
         List<Pet> result = ((List<Pet>) petRepository.findAll()).stream()
                 .filter(pet -> pet.getPrice() <= price)
@@ -132,7 +125,6 @@ public class PetController {
 
     // Add this method to your PetController
     @PostMapping(path = "/pets/bulk")
-    @CrossOrigin(origins = "*")
     public ResponseEntity<List<Pet>> addPetsBulk(@RequestBody List<Pet> pets) {
         try {
             if (pets == null || pets.isEmpty()) {

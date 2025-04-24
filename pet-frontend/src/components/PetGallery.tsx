@@ -1,4 +1,3 @@
-// src/components/PetGallery.tsx
 import { useState, useEffect } from 'react';
 import { fetchPets, createPet, updatePet, deletePet, Pet } from '../api/petService';
 import PetCard from './PetCard';
@@ -8,7 +7,8 @@ export default function PetGallery() {
   const [pets, setPets] = useState<Pet[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [newPet, setNewPet] = useState<Omit<Pet, 'id'>>({ 
+  const [showAddModal, setShowAddModal] = useState(false);
+  const [newPet, setNewPet] = useState<Omit<Pet, 'id'>>({
     name: '',
     species: '',
     breed: '',
@@ -18,10 +18,22 @@ export default function PetGallery() {
     price: 0
   });
 
-  // Load initial data
+  const [notifications, setNotifications] = useState<{ message: string, type: string, id: number }[]>([]);
+  let notificationId = 0;
+
   useEffect(() => {
     loadPets();
   }, []);
+
+  useEffect(() => {
+    if (notifications.length > 0) {
+      const timer = setTimeout(() => {
+        setNotifications(prev => prev.slice(1)); // Remove the oldest notification after it disappears
+      }, 5000); // Keep the notification for 5 seconds
+
+      return () => clearTimeout(timer);
+    }
+  }, [notifications]);
 
   const loadPets = async () => {
     try {
@@ -41,7 +53,7 @@ export default function PetGallery() {
     try {
       const createdPet = await createPet(newPet);
       setPets(prevPets => [...prevPets, createdPet]);
-      setNewPet({ 
+      setNewPet({
         name: '',
         species: '',
         breed: '',
@@ -50,6 +62,8 @@ export default function PetGallery() {
         description: '',
         price: 0
       });
+      setShowAddModal(false);
+      addNotification('Pet added successfully!', 'add');
     } catch (err) {
       console.error('Error adding pet:', err);
       loadPets();
@@ -57,44 +71,42 @@ export default function PetGallery() {
   };
 
   const handleUpdatePet = async (updatedPet: Pet) => {
+    if (!updatedPet.id) {
+      console.error('Cannot update pet: missing ID.');
+      return;
+    }
     try {
-      setPets(prevPets => 
-        prevPets.map(pet => 
-          pet.id === updatedPet.id ? { ...pet, ...updatedPet } : pet
-        )
+      await updatePet(updatedPet.id, updatedPet);
+      setPets(prevPets =>
+        prevPets.map(pet => (pet.id === updatedPet.id ? updatedPet : pet))
       );
-      await updatePet(updatedPet.id!, updatedPet);
+      addNotification('Pet edited successfully!', 'edit');
     } catch (err) {
       console.error('Error updating pet:', err);
-      loadPets();
     }
   };
 
   const handleDeletePet = async (id: number) => {
     try {
-      setPets(prevPets => prevPets.filter(pet => pet.id !== id));
       await deletePet(id);
+      setPets(prevPets => prevPets.filter(pet => pet.id !== id));
+      addNotification('Pet deleted successfully!', 'delete');
     } catch (err) {
       console.error('Error deleting pet:', err);
-      loadPets();
     }
   };
 
+  const addNotification = (message: string, type: string) => {
+    notificationId += 1; // Increment the ID for each new notification
+    setNotifications(prev => [...prev, { message, type, id: notificationId }]);
+  };
+
   const handleNewPetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    
-    setNewPet(prev => {
-      if (name === 'price') {
-        return {
-          ...prev,
-          [name]: value === '' ? 0 : parseFloat(value) || 0
-        };
-      }
-      return {
-        ...prev,
-        [name]: value
-      };
-    });
+    const { name, value, type } = e.target;
+    setNewPet(prev => ({
+      ...prev,
+      [name]: type === 'number' ? parseFloat(value) || 0 : value
+    }));
   };
 
   if (loading) return <div className="loading-state">Loading...</div>;
@@ -105,70 +117,16 @@ export default function PetGallery() {
       <h1>PET GALLERY</h1>
       <p>Kristenz Mingoy - BSIT-3A</p>
 
-      <div className="add-pet-form">
-        <h2>Add New Pet</h2>
-        <div className="form-grid">
-          <input
-            name="name"
-            value={newPet.name}
-            onChange={handleNewPetChange}
-            placeholder="Name"
-            required
-          />
-          <input
-            name="species"
-            value={newPet.species}
-            onChange={handleNewPetChange}
-            placeholder="Species"
-            required
-          />
-          <input
-            name="breed"
-            value={newPet.breed}
-            onChange={handleNewPetChange}
-            placeholder="Breed"
-          />
-          <input
-            name="gender"
-            value={newPet.gender}
-            onChange={handleNewPetChange}
-            placeholder="Gender"
-          />
-          <input
-            name="image"
-            value={newPet.image}
-            onChange={handleNewPetChange}
-            placeholder="Image URL"
-            type="url"
-          />
-          <input
-            name="price"
-            type="number"
-            value={newPet.price === 0 ? '' : newPet.price}
-            onChange={handleNewPetChange}
-            placeholder="Price"
-            min="0"
-            step="0.01"
-          />
-          <input
-            name="description"
-            value={newPet.description}
-            onChange={handleNewPetChange}
-            placeholder="Description"
-          />
-        </div>
-        <button 
-          className="btn add-btn" 
-          onClick={handleAddPet}
-          disabled={!newPet.name || !newPet.species}
-        >
-          Add Pet
-        </button>
-      </div>
+      <button
+        className="btn add-btn"
+        onClick={() => setShowAddModal(true)}
+      >
+        Add New Pet
+      </button>
 
       <div className="pets-container">
         {pets.length === 0 ? (
-          <div className="empty-state">No pets found. Add some pets!</div>
+          <div className="empty-state">No pets found.</div>
         ) : (
           pets.map(pet => (
             <PetCard
@@ -179,6 +137,91 @@ export default function PetGallery() {
             />
           ))
         )}
+      </div>
+
+      {showAddModal && (
+        <div className="modal-overlay">
+          <div className="add-pet-form modal-content">
+            <h2>Add New Pet</h2>
+            <div className="form-grid">
+              <input
+                name="name"
+                value={newPet.name}
+                onChange={handleNewPetChange}
+                placeholder="Name"
+                required
+              />
+              <input
+                name="species"
+                value={newPet.species}
+                onChange={handleNewPetChange}
+                placeholder="Species"
+                required
+              />
+              <input
+                name="breed"
+                value={newPet.breed}
+                onChange={handleNewPetChange}
+                placeholder="Breed"
+              />
+              <input
+                name="gender"
+                value={newPet.gender}
+                onChange={handleNewPetChange}
+                placeholder="Gender"
+              />
+              <input
+                name="image"
+                value={newPet.image}
+                onChange={handleNewPetChange}
+                placeholder="Image URL"
+                type="url"
+              />
+              <input
+                name="price"
+                type="number"
+                value={newPet.price === 0 ? '' : newPet.price}
+                onChange={handleNewPetChange}
+                placeholder="Price"
+                min="0"
+                step="0.01"
+              />
+              <input
+                name="description"
+                value={newPet.description}
+                onChange={handleNewPetChange}
+                placeholder="Description"
+              />
+            </div>
+            <div className="form-actions">
+              <button
+                className="btn add-btn"
+                onClick={handleAddPet}
+                disabled={!newPet.name || !newPet.species}
+              >
+                Add Pet
+              </button>
+              <button
+                className="btn cancel-btn"
+                onClick={() => setShowAddModal(false)}
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Display Notifications */}
+      <div className="notifications-container">
+        {notifications.map(notification => (
+          <div
+            key={notification.id}
+            className={`custom-notification ${notification.type}`}
+          >
+            {notification.message}
+          </div>
+        ))}
       </div>
     </div>
   );
