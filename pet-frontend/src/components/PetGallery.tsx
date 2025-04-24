@@ -146,7 +146,7 @@ export default function PetGallery() {
 
   return (
     <div className="pet-gallery">
-      <h1>PET GALLERY</h1>
+      <h1>PET STORE</h1>
       <p>Kristenz Mingoy - BSIT-3A</p>
 
       <button className="btn add-btn" onClick={() => setShowAddModal(true)}>
