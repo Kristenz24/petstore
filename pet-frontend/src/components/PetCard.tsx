@@ -54,30 +54,39 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
       <div className="pet-content">
         {isEditing ? (
           <>
+            <label>name</label>
             <input
               name="name"
               value={editedPet.name}
               onChange={handleChange}
               className="edit-input"
             />
+
+            <label>species</label>
             <input
               name="species"
               value={editedPet.species}
               onChange={handleChange}
               className="edit-input"
             />
+
+            <label>breed</label>
             <input
               name="breed"
               value={editedPet.breed}
               onChange={handleChange}
               className="edit-input"
             />
+
+            <label>gender</label>
             <input
               name="gender"
               value={editedPet.gender}
               onChange={handleChange}
               className="edit-input"
             />
+
+            <label>price</label>
             <input
               name="price"
               type="number"
@@ -85,6 +94,8 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
               onChange={handleChange}
               className="edit-input"
             />
+
+            <label>description</label>
             <textarea
               name="description"
               value={editedPet.description}
