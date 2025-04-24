@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { fetchPets, createPet, updatePet, deletePet, Pet } from '../api/petService';
 import PetCard from './PetCard';
 import '../App.css';
@@ -8,6 +8,8 @@ export default function PetGallery() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [currentPet, setCurrentPet] = useState<Pet | null>(null);
   const [newPet, setNewPet] = useState<Omit<Pet, 'id'>>({
     name: '',
     species: '',
@@ -19,10 +21,9 @@ export default function PetGallery() {
   });
 
   const [notifications, setNotifications] = useState<{ message: string, type: string, id: number }[]>([]);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);  // State for delete confirmation modal
-  const [petToDelete, setPetToDelete] = useState<Pet | null>(null);  // Store the pet to delete
-
-  let notificationId = 0;
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [petToDelete, setPetToDelete] = useState<Pet | null>(null);
+  const notificationId = useRef(0);
 
   useEffect(() => {
     loadPets();
@@ -31,9 +32,8 @@ export default function PetGallery() {
   useEffect(() => {
     if (notifications.length > 0) {
       const timer = setTimeout(() => {
-        setNotifications(prev => prev.slice(1)); // Remove the oldest notification after it disappears
-      }, 5000); // Keep the notification for 5 seconds
-
+        setNotifications(prev => prev.slice(1));
+      }, 5000);
       return () => clearTimeout(timer);
     }
   }, [notifications]);
@@ -73,16 +73,15 @@ export default function PetGallery() {
     }
   };
 
-  const handleUpdatePet = async (updatedPet: Pet) => {
-    if (!updatedPet.id) {
-      console.error('Cannot update pet: missing ID.');
-      return;
-    }
+  const handleUpdatePet = async () => {
+    if (!currentPet?.id) return;
+    
     try {
-      await updatePet(updatedPet.id, updatedPet);
+      await updatePet(currentPet.id, currentPet);
       setPets(prevPets =>
-        prevPets.map(pet => (pet.id === updatedPet.id ? updatedPet : pet))
+        prevPets.map(pet => (pet.id === currentPet.id ? currentPet : pet))
       );
+      setShowEditModal(false);
       addNotification('Pet edited successfully!', 'edit');
     } catch (err) {
       console.error('Error updating pet:', err);
@@ -100,11 +99,11 @@ export default function PetGallery() {
   };
 
   const addNotification = (message: string, type: string) => {
-    notificationId += 1; // Increment the ID for each new notification
-    setNotifications(prev => [...prev, { message, type, id: notificationId }]);
+    notificationId.current += 1;
+    setNotifications(prev => [...prev, { message, type, id: notificationId.current }]);
   };
 
-  const handleNewPetChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleNewPetChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value, type } = e.target;
     setNewPet(prev => ({
       ...prev,
@@ -112,23 +111,34 @@ export default function PetGallery() {
     }));
   };
 
+  const handleEditChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setCurrentPet(prev => prev ? {
+      ...prev,
+      [name]: name === 'price' ? parseFloat(value) : value
+    } : null);
+  };
+
+  const openEditModal = (pet: Pet) => {
+    setCurrentPet({...pet});
+    setShowEditModal(true);
+  };
+
   const openDeleteModal = (pet: Pet) => {
     setPetToDelete(pet);
-    setShowDeleteModal(true);  // Show delete confirmation modal
+    setShowDeleteModal(true);
   };
 
   const confirmDelete = () => {
-    const id = petToDelete?.id;
-  
-    if (id !== undefined) {
-      handleDeletePet(id);
+    if (petToDelete?.id !== undefined) {
+      handleDeletePet(petToDelete.id);
       setShowDeleteModal(false);
-      setPetToDelete(null); // Clear the selected pet after deletion
+      setPetToDelete(null);
     }
   };
 
   const cancelDelete = () => {
-    setShowDeleteModal(false);  // Close delete confirmation modal without deleting
+    setShowDeleteModal(false);
   };
 
   if (loading) return <div className="loading-state">Loading...</div>;
@@ -139,10 +149,7 @@ export default function PetGallery() {
       <h1>PET GALLERY</h1>
       <p>Kristenz Mingoy - BSIT-3A</p>
 
-      <button
-        className="btn add-btn"
-        onClick={() => setShowAddModal(true)}
-      >
+      <button className="btn add-btn" onClick={() => setShowAddModal(true)}>
         Add New Pet
       </button>
 
@@ -154,81 +161,104 @@ export default function PetGallery() {
             <PetCard
               key={pet.id}
               pet={pet}
-              onEdit={handleUpdatePet}
-              onDelete={() => openDeleteModal(pet)}  // Open delete confirmation modal on delete button click
+              onEdit={() => openEditModal(pet)}
+              onDelete={() => openDeleteModal(pet)}
             />
           ))
         )}
       </div>
 
+      {/* Add Pet Modal */}
       {showAddModal && (
         <div className="modal-overlay">
-          <div className="add-pet-form modal-content">
-            <h2>Add New Pet</h2>
-            <div className="form-grid">
-              <input
-                name="name"
-                value={newPet.name}
-                onChange={handleNewPetChange}
-                placeholder="Name"
-                required
-              />
-              <input
-                name="species"
-                value={newPet.species}
-                onChange={handleNewPetChange}
-                placeholder="Species"
-                required
-              />
-              <input
-                name="breed"
-                value={newPet.breed}
-                onChange={handleNewPetChange}
-                placeholder="Breed"
-              />
-              <input
-                name="gender"
-                value={newPet.gender}
-                onChange={handleNewPetChange}
-                placeholder="Gender"
-              />
-              <input
-                name="image"
-                value={newPet.image}
-                onChange={handleNewPetChange}
-                placeholder="Image URL"
-                type="url"
-              />
-              <input
-                name="price"
-                type="number"
-                value={newPet.price === 0 ? '' : newPet.price}
-                onChange={handleNewPetChange}
-                placeholder="Price"
-                min="0"
-                step="0.01"
-              />
-              <input
-                name="description"
-                value={newPet.description}
-                onChange={handleNewPetChange}
-                placeholder="Description"
-              />
+          <div className="modal">
+            <div className="modal-preview">
+              <h2>Card Preview</h2>
+              <div className="pet-card">
+                <div className="pet-media">
+                  <img
+                    src={newPet.image || '/images/placeholder.jpg'}
+                    alt={`Preview of ${newPet.name || 'new pet'}`}
+                    onError={(e) => (e.currentTarget.src = '/images/placeholder.jpg')}
+                  />
+                </div>
+                <div className="pet-content">
+                  <h2>{newPet.name || 'Pet Name'}</h2>
+                  <h3>Species: {newPet.species || 'Unknown'}</h3>
+                  <h3>Breed: {newPet.breed || 'Unknown'}</h3>
+                  <h3>Gender: {newPet.gender || 'Unknown'}</h3>
+                  <h3>Price: ${newPet.price?.toFixed(2) || '0.00'}</h3>
+                  <div className="pet-description expanded">
+                    {newPet.description || 'No description provided'}
+                  </div>
+                </div>
+              </div>
             </div>
-            <div className="form-actions">
-              <button
-                className="btn add-btn"
-                onClick={handleAddPet}
-                disabled={!newPet.name || !newPet.species}
-              >
-                Add Pet
-              </button>
-              <button
-                className="btn cancel-btn"
-                onClick={() => setShowAddModal(false)}
-              >
-                Cancel
-              </button>
+            <div className="modal-form">
+              <h2>Add New Pet</h2>
+              <input name="name" value={newPet.name} onChange={handleNewPetChange} placeholder="Name" required />
+              <input name="species" value={newPet.species} onChange={handleNewPetChange} placeholder="Species" required />
+              <input name="breed" value={newPet.breed} onChange={handleNewPetChange} placeholder="Breed" />
+              <input name="gender" value={newPet.gender} onChange={handleNewPetChange} placeholder="Gender" />
+              <input name="image" value={newPet.image} onChange={handleNewPetChange} placeholder="Image URL" type="url" />
+              <input name="price" type="number" value={newPet.price || ''} onChange={handleNewPetChange} placeholder="Price" min="0" step="0.01" />
+              <textarea name="description" value={newPet.description} onChange={handleNewPetChange} placeholder="Description" />
+              <div className="form-actions">
+                <button className="btn add-btn" onClick={handleAddPet} disabled={!newPet.name || !newPet.species}>
+                  Add Pet
+                </button>
+                <button className="btn cancel-btn" onClick={() => setShowAddModal(false)}>
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Edit Pet Modal */}
+      {showEditModal && currentPet && (
+        <div className="modal-overlay">
+          <div className="modal">
+            <div className="modal-preview">
+              <h2>Card Preview</h2>
+              <div className="pet-card">
+                <div className="pet-media">
+                  <img
+                    src={currentPet.image || '/images/placeholder.jpg'}
+                    alt={`Preview of ${currentPet.name}`}
+                    onError={(e) => (e.currentTarget.src = '/images/placeholder.jpg')}
+                  />
+                </div>
+                <div className="pet-content">
+                  <h2>{currentPet.name}</h2>
+                  <h3>Species: {currentPet.species}</h3>
+                  <h3>Breed: {currentPet.breed}</h3>
+                  <h3>Gender: {currentPet.gender}</h3>
+                  <h3>Price: ${currentPet.price?.toFixed(2)}</h3>
+                  <div className="pet-description expanded">
+                    {currentPet.description}
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div className="modal-form">
+              <h2>Edit Pet</h2>
+              <input name="name" value={currentPet.name} onChange={handleEditChange} placeholder="Name" required />
+              <input name="species" value={currentPet.species} onChange={handleEditChange} placeholder="Species" required />
+              <input name="breed" value={currentPet.breed} onChange={handleEditChange} placeholder="Breed" />
+              <input name="gender" value={currentPet.gender} onChange={handleEditChange} placeholder="Gender" />
+              <input name="image" value={currentPet.image} onChange={handleEditChange} placeholder="Image URL" type="url" />
+              <input name="price" type="number" value={currentPet.price} onChange={handleEditChange} placeholder="Price" min="0" step="0.01" />
+              <textarea name="description" value={currentPet.description} onChange={handleEditChange} placeholder="Description" />
+              <div className="form-actions">
+                <button className="btn save-btn" onClick={handleUpdatePet}>
+                  Save Changes
+                </button>
+                <button className="btn cancel-btn" onClick={() => setShowEditModal(false)}>
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -251,13 +281,10 @@ export default function PetGallery() {
         </div>
       )}
 
-      {/* Display Notifications */}
+      {/* Notifications */}
       <div className="notifications-container">
         {notifications.map(notification => (
-          <div
-            key={notification.id}
-            className={`custom-notification ${notification.type}`}
-          >
+          <div key={notification.id} className={`custom-notification ${notification.type}`}>
             {notification.message}
           </div>
         ))}
