@@ -210,12 +210,19 @@ export default function PetGallery() {
             </div>
             <div className="modal-form">
               <h2>Add New Pet</h2>
+              <label>name</label>
               <input name="name" value={newPet.name} onChange={handleNewPetChange} placeholder="Name" required />
+              <label>species</label>
               <input name="species" value={newPet.species} onChange={handleNewPetChange} placeholder="Species" required />
+              <label>breed</label>
               <input name="breed" value={newPet.breed} onChange={handleNewPetChange} placeholder="Breed" />
+              <label>gender</label>
               <input name="gender" value={newPet.gender} onChange={handleNewPetChange} placeholder="Gender" />
+              <label>image</label>
               <input name="image" value={newPet.image} onChange={handleNewPetChange} placeholder="Image URL" type="url" />
+              <label>price</label>
               <input name="price" type="number" value={newPet.price || ''} onChange={handleNewPetChange} placeholder="Price" min="0" step="0.01" />
+              <label>description</label>
               <textarea name="description" value={newPet.description} onChange={handleNewPetChange} placeholder="Description" />
               <div className="form-actions">
                 <button className="btn add-btn" onClick={handleAddPet} disabled={!newPet.name || !newPet.species}>

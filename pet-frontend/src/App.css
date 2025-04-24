@@ -414,6 +414,11 @@ textarea {
   color: var(--text-primary);
 }
 
+.modal-form{
+  border: 1px dashed var(--border-card);
+  border-radius: 4px;
+}
+
 .edit-button-group {
   display: flex;
   gap: 0.8rem;
