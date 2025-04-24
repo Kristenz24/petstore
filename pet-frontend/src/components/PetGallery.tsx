@@ -192,6 +192,20 @@ export default function PetGallery() {
                     {newPet.description || 'No description provided'}
                   </div>
                 </div>
+                <div className="pet-actions">
+                  <button className="btn edit-btn" >
+                  <i className="fa-solid fa-pen-to-square"></i>
+                    Edit
+                  </button>
+                  <button className="btn delete-btn">
+                  <i className="fa-solid fa-trash"></i>
+                    Delete
+                  </button>
+                  <button className="btn expand-btn" >
+                    <i className="fa-solid fa-chevron-up"></i> 
+                  </button>
+                </div>
+                
               </div>
             </div>
             <div className="modal-form">
@@ -239,6 +253,19 @@ export default function PetGallery() {
                   <div className="pet-description expanded">
                     {currentPet.description}
                   </div>
+                </div>
+                <div className="pet-actions">
+                  <button className="btn edit-btn" >
+                  <i className="fa-solid fa-pen-to-square"></i>
+                    Edit
+                  </button>
+                  <button className="btn delete-btn">
+                  <i className="fa-solid fa-trash"></i>
+                    Delete
+                  </button>
+                  <button className="btn expand-btn" >
+                    <i className="fa-solid fa-chevron-up"></i> 
+                  </button>
                 </div>
               </div>
             </div>
