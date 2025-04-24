@@ -146,10 +146,11 @@ export default function PetGallery() {
 
   return (
     <div className="pet-gallery">
-      <h1>PET STORE</h1>
+      <h1><i className="fa-solid fa-paw"></i> PET STORE</h1>
       <p>Kristenz Mingoy - BSIT-3A</p>
 
       <button className="btn add-btn" onClick={() => setShowAddModal(true)}>
+      <i className="fa-solid fa-plus"></i>
         Add New Pet
       </button>
 

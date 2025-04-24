@@ -98,7 +98,7 @@ label {
   cursor: pointer;
   align-self:flex-end;
   transition: background-color 0.2s;
-  width: 150px;
+  width: 160px;
   height: 45px;
   border: 1px solid var(--border-card);
 }
