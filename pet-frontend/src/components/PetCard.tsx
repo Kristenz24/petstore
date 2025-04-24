@@ -35,13 +35,15 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
       </div>
       <div className="pet-actions">
         <button className="btn edit-btn" onClick={() => onEdit(pet)}>
+        <i className="fa-solid fa-pen-to-square"></i>
           Edit
         </button>
         <button className="btn delete-btn" onClick={() => onDelete(pet)}>
+        <i className="fa-solid fa-trash"></i>
           Delete
         </button>
         <button className="btn expand-btn" onClick={handleExpandClick}>
-          {expanded ? 'Show Less' : 'Show More'}
+          {expanded ? <i className="fa-solid fa-chevron-up"></i> : <i className="fa-solid fa-chevron-down"></i> }
         </button>
       </div>
     </div>

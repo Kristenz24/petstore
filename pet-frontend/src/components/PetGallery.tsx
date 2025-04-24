@@ -244,14 +244,28 @@ export default function PetGallery() {
             </div>
             <div className="modal-form">
               <h2>Edit Pet</h2>
+              <label>name</label>
               <input name="name" value={currentPet.name} onChange={handleEditChange} placeholder="Name" required />
+              
+              <label>species</label>
               <input name="species" value={currentPet.species} onChange={handleEditChange} placeholder="Species" required />
+
+              <label>breed</label>
               <input name="breed" value={currentPet.breed} onChange={handleEditChange} placeholder="Breed" />
+              
+              <label>gender</label>
               <input name="gender" value={currentPet.gender} onChange={handleEditChange} placeholder="Gender" />
+              
+              <label>image</label>
               <input name="image" value={currentPet.image} onChange={handleEditChange} placeholder="Image URL" type="url" />
+              
+              <label>price</label>
               <input name="price" type="number" value={currentPet.price} onChange={handleEditChange} placeholder="Price" min="0" step="0.01" />
+              
+              <label>description</label>
               <textarea name="description" value={currentPet.description} onChange={handleEditChange} placeholder="Description" />
               <div className="form-actions">
+
                 <button className="btn save-btn" onClick={handleUpdatePet}>
                   Save Changes
                 </button>
