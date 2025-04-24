@@ -19,6 +19,9 @@ export default function PetGallery() {
   });
 
   const [notifications, setNotifications] = useState<{ message: string, type: string, id: number }[]>([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);  // State for delete confirmation modal
+  const [petToDelete, setPetToDelete] = useState<Pet | null>(null);  // Store the pet to delete
+
   let notificationId = 0;
 
   useEffect(() => {
@@ -109,6 +112,25 @@ export default function PetGallery() {
     }));
   };
 
+  const openDeleteModal = (pet: Pet) => {
+    setPetToDelete(pet);
+    setShowDeleteModal(true);  // Show delete confirmation modal
+  };
+
+  const confirmDelete = () => {
+    const id = petToDelete?.id;
+  
+    if (id !== undefined) {
+      handleDeletePet(id);
+      setShowDeleteModal(false);
+      setPetToDelete(null); // Clear the selected pet after deletion
+    }
+  };
+
+  const cancelDelete = () => {
+    setShowDeleteModal(false);  // Close delete confirmation modal without deleting
+  };
+
   if (loading) return <div className="loading-state">Loading...</div>;
   if (error) return <div className="error-state">{error}</div>;
 
@@ -133,7 +155,7 @@ export default function PetGallery() {
               key={pet.id}
               pet={pet}
               onEdit={handleUpdatePet}
-              onDelete={handleDeletePet}
+              onDelete={() => openDeleteModal(pet)}  // Open delete confirmation modal on delete button click
             />
           ))
         )}
@@ -205,6 +227,23 @@ export default function PetGallery() {
                 className="btn cancel-btn"
                 onClick={() => setShowAddModal(false)}
               >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal-overlay">
+          <div className="modal-content">
+            <h2>Are you sure you want to delete this pet?</h2>
+            <div className="form-actions">
+              <button className="btn delete-btn" onClick={confirmDelete}>
+                Yes, Delete
+              </button>
+              <button className="btn cancel-btn" onClick={cancelDelete}>
                 Cancel
               </button>
             </div>

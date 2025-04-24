@@ -12,7 +12,7 @@ body {
 
 label {
   font-size: 0.7rem;
-  margin-bottom: 0.5rem;
+  margin-block: 0.5rem;
   display: block;
   text-transform: capitalize;
   color: #e0e1dd;
@@ -29,7 +29,7 @@ label {
   padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .pet-gallery h1,
@@ -88,6 +88,11 @@ label {
   width: 90%;
   max-width: 500px;
   z-index: 1001;
+}
+.modal-content h2 {
+  color: #e0e1dd;
+  font-size: 1.2rem;
+  margin-bottom: 30px;
 }
 
 .add-pet-form h2 {
@@ -188,6 +193,16 @@ textarea {
 .pet-description {
   margin-top: 10px;
   font-size: 0.9rem;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: height 0.5s ease-out, opacity 0.3s ease;
+}
+
+/* Expanded pet description */
+.pet-description.expanded {
+  height: auto;
+  opacity: 1;
 }
 
 /* ===== Card Actions ===== */
@@ -200,7 +215,7 @@ textarea {
 
 /* ===== Buttons ===== */
 .btn {
-  padding: 8px 15px;
+  padding: .8rem 1.5rem;
   font-weight: 500;
   border: none;
   border-radius: 4px;

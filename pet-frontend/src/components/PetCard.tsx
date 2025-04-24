@@ -55,67 +55,79 @@ export default function PetCard({ pet, onEdit, onDelete }: PetCardProps) {
       </div>
 
       <div className="pet-content">
-        {isEditing ? (
-          <>
-            <label>name</label>
-            <input
-              name="name"
-              value={editedPet.name}
-              onChange={handleChange}
-              className="edit-input"
-            />
+      {isEditing ? (
+  <>
+    <label>Name</label>
+    <input
+      name="name"
+      value={editedPet.name}
+      onChange={handleChange}
+      className="edit-input"
+    />
 
-            <label>species</label>
-            <input
-              name="species"
-              value={editedPet.species}
-              onChange={handleChange}
-              className="edit-input"
-            />
+    <label>Species</label>
+    <input
+      name="species"
+      value={editedPet.species}
+      onChange={handleChange}
+      className="edit-input"
+    />
 
-            <label>breed</label>
-            <input
-              name="breed"
-              value={editedPet.breed}
-              onChange={handleChange}
-              className="edit-input"
-            />
+    <label>Breed</label>
+    <input
+      name="breed"
+      value={editedPet.breed}
+      onChange={handleChange}
+      className="edit-input"
+    />
 
-            <label>gender</label>
-            <input
-              name="gender"
-              value={editedPet.gender}
-              onChange={handleChange}
-              className="edit-input"
-            />
+    <label>Gender</label>
+    <input
+      name="gender"
+      value={editedPet.gender}
+      onChange={handleChange}
+      className="edit-input"
+    />
 
-            <label>price</label>
-            <input
-              name="price"
-              type="number"
-              value={editedPet.price}
-              onChange={handleChange}
-              className="edit-input"
-            />
+    <label>Price</label>
+    <input
+      name="price"
+      type="number"
+      value={editedPet.price}
+      onChange={handleChange}
+      className="edit-input"
+    />
 
-            <label>description</label>
-            <textarea
-              name="description"
-              value={editedPet.description}
-              onChange={handleChange}
-              className="edit-textarea"
-            />
-          </>
-        ) : (
-          <>
-            <h2>{pet.name}</h2>
-            <h3>Species: {pet.species}</h3>
-            <h3>Breed: {pet.breed}</h3>
-            <h3>Gender: {pet.gender}</h3>
-            <h3>Price: ${pet.price.toFixed(2)}</h3>
-            {expanded && <p className="pet-description">{pet.description}</p>}
-          </>
-        )}
+    <label>Image URL</label>
+    <input
+      name="image"
+      type="url"
+      value={editedPet.image}
+      onChange={handleChange}
+      className="edit-input"
+    />
+
+    <label>Description</label>
+    <textarea
+      name="description"
+      value={editedPet.description}
+      onChange={handleChange}
+      className="edit-textarea"
+    />
+  </>
+) : (
+  <>
+    <h2>{pet.name}</h2>
+    <h3>Species: {pet.species}</h3>
+    <h3>Breed: {pet.breed}</h3>
+    <h3>Gender: {pet.gender}</h3>
+    <h3>Price: ${pet.price.toFixed(2)}</h3>
+    <div className={`pet-description ${expanded ? 'expanded' : ''}`}>
+      {pet.description}
+    </div>
+  </>
+)}
+
       </div>
 
       <div className="pet-actions">
